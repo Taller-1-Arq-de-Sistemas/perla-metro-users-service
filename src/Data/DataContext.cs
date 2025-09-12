@@ -9,5 +9,15 @@ namespace PerlaMetroUsersService.Data
 
         public DbSet<User> Users { get; set; } = null!;
         public DbSet<Role> Roles { get; set; } = null!;
+
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            base.OnModelCreating(modelBuilder);
+
+            modelBuilder.Entity<User>()
+                .HasIndex(u => u.Email)
+                .IsUnique()
+                .HasFilter("\"DeletedAt\" IS NULL");
+        }
     }
 }
