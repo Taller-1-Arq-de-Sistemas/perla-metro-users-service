@@ -1,45 +1,73 @@
 using PerlaMetroUsersService.Services.Interfaces;
 using PerlaMetroUsersService.Repositories.Interfaces;
-using PerlaMetroUsersService.Models;
+using PerlaMetroUsersService.Mappers.Users;
+using PerlaMetroUsersService.DTOs.Users;
+using PerlaMetroUsersService.Exceptions;
+using Microsoft.AspNetCore.Http.HttpResults;
 
 namespace PerlaMetroUsersService.Services
 {
     public class UserService : IUserService
     {
-        private readonly IUserRepository _userRepository;
+        private readonly IUnitOfWork _unitOfWork;
+        private readonly IPasswordHasherService _passwordHasher;
+        private readonly IClockService _clock;
 
-        public UserService(IUserRepository userRepository)
+        public UserService(IUnitOfWork unitOfWork, IPasswordHasherService passwordHasher, IClockService clock)
         {
-            _userRepository = userRepository;
+            _unitOfWork = unitOfWork;
+            _passwordHasher = passwordHasher;
+            _clock = clock;
+        }
+        public async Task<GetUserResponseDto> Create(CreateUserRequestDto user, CancellationToken ct = default)
+        {
+            if (await _unitOfWork.Users.ExistsByEmailAsync(user.Email, ct))
+                throw new DuplicateException("User with this email already exists.");
+
+            var roleName = user.Role?.Trim().ToLowerInvariant() ?? throw new ArgumentException("Role is required.");
+            var role = await _unitOfWork.Roles.GetByNameAsync(roleName, ct) ??
+                throw new NotFoundException("Role does not exist.");
+
+            var newUser = UsersWriteMappers.CreateUser(user, role.Id, _passwordHasher, _clock);
+
+            _unitOfWork.Users.Create(newUser);
+            await _unitOfWork.SaveChangesAsync(ct);
+
+            return await _unitOfWork.Users.GetByIdAsync(newUser.Id, UsersReadMappers.ToDetail, ct)
+                   ?? throw new NotFoundException("User not found.");
+        }
+        public async Task Update(string id, EditUserRequestDto user, CancellationToken ct = default)
+        {
+            var existingUser = await _unitOfWork.Users.GetEntityByIdAsync(id, ct) ??
+                throw new NotFoundException("User not found.");
+            UsersWriteMappers.ApplyProfileEdit(user, existingUser, _passwordHasher);
+            await _unitOfWork.SaveChangesAsync(ct);
         }
 
-        public async Task CreateUserAsync(User user)
+        public async Task Delete(string id, CancellationToken ct = default)
         {
-            string userId = Guid.NewGuid().ToString();
-            user.Id = userId;
-            string hashedPassword = BCrypt.Net.BCrypt.HashPassword(user.Password);
-            user.Password = hashedPassword;
-            await _userRepository.CreateUserAsync(user);
+            var existingUser = await _unitOfWork.Users.GetEntityByIdAsync(id, ct) ??
+                throw new NotFoundException("User not found.");
+            _unitOfWork.Users.Delete(existingUser);
+            await _unitOfWork.SaveChangesAsync(ct);
         }
 
-        public async Task<IEnumerable<User>> GetAllUsersAsync()
+        public async Task SoftDelete(string id, CancellationToken ct = default)
         {
-            return await _userRepository.GetAllUsersAsync();
+            var existingUser = await _unitOfWork.Users.GetEntityByIdAsync(id, ct) ??
+                throw new NotFoundException("User not found.");
+            if (existingUser.DeletedAt != null)
+                throw new ConflictException("User is already deleted.");
+            existingUser.DeletedAt = _clock.UtcNow;
+            await _unitOfWork.SaveChangesAsync(ct);
         }
 
-        public async Task<User?> GetUserByIdAsync(string id)
-        {
-            return await _userRepository.GetUserByIdAsync(id);
-        }
+        public async Task<List<ListUserResponseDto>> GetAll(CancellationToken ct = default) =>
+            await _unitOfWork.Users.GetAllAsync(UsersReadMappers.ToListItem, ct);
 
-        public async Task<User?> UpdateUserAsync(string id, User user)
-        {
-            return await _userRepository.UpdateUserAsync(id, user);
-        }
+        public async Task<GetUserResponseDto?> GetById(string id, CancellationToken ct = default) =>
+            await _unitOfWork.Users.GetByIdAsync(id, UsersReadMappers.ToDetail, ct) ??
+                throw new NotFoundException("User not found.");
 
-        public async Task<bool> DeleteUserAsync(string id)
-        {
-            return await _userRepository.DeleteUserAsync(id);
-        }
     }
 }
