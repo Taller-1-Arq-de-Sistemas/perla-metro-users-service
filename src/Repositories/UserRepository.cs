@@ -1,3 +1,4 @@
+using System.Linq.Expressions;
 using Microsoft.EntityFrameworkCore;
 using PerlaMetroUsersService.Data;
 using PerlaMetroUsersService.Models;
@@ -14,37 +15,37 @@ namespace PerlaMetroUsersService.Repositories
             _context = context;
         }
 
-        public async Task CreateUserAsync(User user)
-        {
-            await _context.Users.AddAsync(user);
-            await _context.SaveChangesAsync();
-        }
+        public void Create(User user) => _context.Users.Add(user);
 
-        public async Task<bool> DeleteUserAsync(string id)
-        {
-            var user = await _context.Users.FindAsync(id);
-            if (user == null) return false;
-            _context.Users.Remove(user);
-            await _context.SaveChangesAsync();
-            return true;
-        }
+        public void Delete(User user) => _context.Users.Remove(user);
 
-        public async Task<IEnumerable<User>> GetAllUsersAsync()
-        {
-            return await _context.Users.ToListAsync();
-        }
+        public void Update(User user) => _context.Users.Update(user);
 
-        public async Task<User?> GetUserByIdAsync(string id)
-        {
-            return await _context.Users.FindAsync(id);
-        }
+        public async Task<List<T>> GetAllAsync<T>(Expression<Func<User, T>> selector, CancellationToken ct = default) =>
+            await _context.Users
+                .Where(u => u.DeletedAt == null)
+                .AsNoTracking()
+                .Select(selector)
+                .ToListAsync(ct);
 
-        public async Task<User?> UpdateUserAsync(string id, User user)
-        {
-            if (id != user.Id) return null;
-            _context.Entry(user).State = EntityState.Modified;
-            await _context.SaveChangesAsync();
-            return user;
-        }
+        public async Task<T?> GetByIdAsync<T>(string id, Expression<Func<User, T>> selector, CancellationToken ct = default) =>
+            await _context.Users
+                .Where(u => u.Id == id && u.DeletedAt == null)
+                .AsNoTracking()
+                .Select(selector)
+                .SingleOrDefaultAsync(ct);
+
+        public async Task<User?> GetEntityByIdAsync(string id, CancellationToken ct = default) =>
+            await _context.Users
+                .FirstOrDefaultAsync(u => u.Id == id && u.DeletedAt == null, ct);
+
+        public async Task<User?> GetByEmailAsync(string email, CancellationToken ct = default) =>
+            await _context.Users
+                .Include(u => u.Role)
+                .FirstOrDefaultAsync(u => u.Email == email && u.DeletedAt == null, ct);
+
+        public async Task<bool> ExistsByEmailAsync(string email, CancellationToken ct = default) =>
+            await _context.Users
+                .AnyAsync(u => u.Email == email && u.DeletedAt == null, ct);
     }
 }

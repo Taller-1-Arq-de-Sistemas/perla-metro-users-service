@@ -1,12 +1,16 @@
+using System.Linq.Expressions;
 using PerlaMetroUsersService.Models;
 
 namespace PerlaMetroUsersService.Repositories.Interfaces;
 
 public interface IUserRepository
 {
-    Task CreateUserAsync(User user);
-    Task<IEnumerable<User>> GetAllUsersAsync();
-    Task<User?> GetUserByIdAsync(string id);
-    Task<User?> UpdateUserAsync(string id, User user);
-    Task<bool> DeleteUserAsync(string id);
+    void Create(User user);
+    void Update(User user);
+    void Delete(User user);
+    Task<List<T>> GetAllAsync<T>(Expression<Func<User, T>> selector, CancellationToken ct = default);
+    Task<T?> GetByIdAsync<T>(string id, Expression<Func<User, T>> selector, CancellationToken ct = default);
+    Task<User?> GetEntityByIdAsync(string id, CancellationToken ct = default);
+    Task<User?> GetByEmailAsync(string email, CancellationToken ct = default);
+    Task<bool> ExistsByEmailAsync(string email, CancellationToken ct = default);
 }
