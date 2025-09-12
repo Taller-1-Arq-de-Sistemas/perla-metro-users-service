@@ -1,9 +1,11 @@
 using Microsoft.AspNetCore.Mvc;
-using PerlaMetroUsersService.Models;
+using PerlaMetroUsersService.DTOs.Users;
 using PerlaMetroUsersService.Services.Interfaces;
 
 namespace PerlaMetroUsersService.Controllers
 {
+    [ApiController]
+    [Route("[controller]")]
     public class UserController : ControllerBase
     {
         private readonly IUserService _userService;
@@ -12,44 +14,41 @@ namespace PerlaMetroUsersService.Controllers
         {
             _userService = userService;
         }
+        [HttpPost]
+        public async Task<IActionResult> CreateUser([FromBody] CreateUserRequestDto user, CancellationToken ct)
+        {
+            var createdUser = await _userService.Create(user, ct);
+            return CreatedAtAction(actionName: nameof(GetUserById),
+                                   controllerName: "User",
+                                   routeValues: new { id = createdUser.Id },
+                                   value: createdUser);
+        }
 
         [HttpGet]
-        public async Task<IActionResult> GetAllUsers()
+        public async Task<IActionResult> GetAllUsers(CancellationToken ct)
         {
-            var users = await _userService.GetAllUsersAsync();
+            var users = await _userService.GetAll(ct);
             return Ok(users);
         }
 
         [HttpGet("{id}")]
-        public async Task<IActionResult> GetUserById(string id)
+        public async Task<IActionResult> GetUserById(string id, CancellationToken ct)
         {
-            var user = await _userService.GetUserByIdAsync(id);
-            if (user == null) return NotFound();
+            var user = await _userService.GetById(id, ct);
             return Ok(user);
         }
 
-        [HttpPost]
-        public async Task<IActionResult> CreateUser([FromBody] User user)
+        [HttpPatch("{id}")]
+        public async Task<IActionResult> UpdateUser(string id, [FromBody] EditUserRequestDto user, CancellationToken ct)
         {
-            if (!ModelState.IsValid) return BadRequest(ModelState);
-            await _userService.CreateUserAsync(user);
-            return CreatedAtAction(nameof(GetUserById), new { id = user.Id }, user);
-        }
-
-        [HttpPut("{id}")]
-        public async Task<IActionResult> UpdateUser(string id, [FromBody] User user)
-        {
-            if (!ModelState.IsValid) return BadRequest(ModelState);
-            var updatedUser = await _userService.UpdateUserAsync(id, user);
-            if (updatedUser == null) return NotFound();
-            return Ok(updatedUser);
+            await _userService.Update(id, user, ct);
+            return NoContent();
         }
 
         [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteUser(string id)
+        public async Task<IActionResult> DeleteUser(string id, CancellationToken ct)
         {
-            var deleted = await _userService.DeleteUserAsync(id);
-            if (!deleted) return NotFound();
+            await _userService.SoftDelete(id, ct);
             return NoContent();
         }
     }
