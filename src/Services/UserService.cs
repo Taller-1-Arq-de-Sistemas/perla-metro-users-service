@@ -3,7 +3,6 @@ using PerlaMetroUsersService.Repositories.Interfaces;
 using PerlaMetroUsersService.Mappers.Users;
 using PerlaMetroUsersService.DTOs.Users;
 using PerlaMetroUsersService.Exceptions;
-using Microsoft.AspNetCore.Http.HttpResults;
 
 namespace PerlaMetroUsersService.Services
 {
@@ -62,8 +61,19 @@ namespace PerlaMetroUsersService.Services
             await _unitOfWork.SaveChangesAsync(ct);
         }
 
-        public async Task<List<ListUserResponseDto>> GetAll(CancellationToken ct = default) =>
-            await _unitOfWork.Users.GetAllAsync(UsersReadMappers.ToListItem, ct);
+        public async Task<List<ListUserResponseDto>> GetAll(string? name, string? email, string? status, CancellationToken ct = default)
+        {
+            var normalizedStatus = string.IsNullOrWhiteSpace(status)
+                ? "active"
+                : status!.Trim().ToLowerInvariant();
+
+            return await _unitOfWork.Users.GetAllAsync(
+                UsersReadMappers.ToListItem,
+                name,
+                email,
+                normalizedStatus,
+                ct);
+        }
 
         public async Task<GetUserResponseDto?> GetById(string id, CancellationToken ct = default) =>
             await _unitOfWork.Users.GetByIdAsync(id, UsersReadMappers.ToDetail, ct) ??

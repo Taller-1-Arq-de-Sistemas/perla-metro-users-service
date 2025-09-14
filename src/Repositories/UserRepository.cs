@@ -22,11 +22,39 @@ namespace PerlaMetroUsersService.Repositories
         public void Update(User user) => _context.Users.Update(user);
 
         public async Task<List<T>> GetAllAsync<T>(Expression<Func<User, T>> selector, CancellationToken ct = default) =>
-            await _context.Users
-                .Where(u => u.DeletedAt == null)
+            await GetAllAsync(selector, name: null, email: null, status: null, ct);
+
+        public async Task<List<T>> GetAllAsync<T>(
+            Expression<Func<User, T>> selector,
+            string? name,
+            string? email,
+            string? status,
+            CancellationToken ct = default)
+        {
+            var query = _context.Users.AsQueryable();
+
+            if (status == "active")
+                query = query.Where(u => u.DeletedAt == null);
+            else if (status == "deleted")
+                query = query.Where(u => u.DeletedAt != null);
+
+            if (!string.IsNullOrWhiteSpace(name))
+            {
+                var n = name.Trim().ToLower();
+                query = query.Where(u => (u.Name + " " + u.LastNames).Contains(n, StringComparison.CurrentCultureIgnoreCase));
+            }
+
+            if (!string.IsNullOrWhiteSpace(email))
+            {
+                var e = email.Trim().ToLower();
+                query = query.Where(u => u.Email.Contains(e, StringComparison.CurrentCultureIgnoreCase));
+            }
+
+            return await query
                 .AsNoTracking()
                 .Select(selector)
                 .ToListAsync(ct);
+        }
 
         public async Task<T?> GetByIdAsync<T>(string id, Expression<Func<User, T>> selector, CancellationToken ct = default) =>
             await _context.Users
