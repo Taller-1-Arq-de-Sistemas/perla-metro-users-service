@@ -27,7 +27,11 @@ namespace PerlaMetroUsersService.Data
             var result = context.Roles?.Any();
             if (result is true or null) return;
 
-            var path = "src/Data/Seeders/RolesData.json";
+            var path = Path.Combine(AppContext.BaseDirectory, "Seeders", "RolesData.json");
+            if (!File.Exists(path))
+            {
+                path = Path.Combine(Directory.GetCurrentDirectory(), "src", "Data", "Seeders", "RolesData.json");
+            }
             var rolesData = File.ReadAllText(path);
             var rolesList = JsonSerializer.Deserialize<List<Role>>(rolesData, options) ??
                 throw new Exception("RolesData.json is empty");
@@ -46,7 +50,11 @@ namespace PerlaMetroUsersService.Data
             var result = context.Users?.Any();
             if (result is true or null) return;
 
-            var path = "src/Data/Seeders/UsersData.json";
+            var path = Path.Combine(AppContext.BaseDirectory, "Seeders", "UsersData.json");
+            if (!File.Exists(path))
+            {
+                path = Path.Combine(Directory.GetCurrentDirectory(), "src", "Data", "Seeders", "UsersData.json");
+            }
             var usersData = File.ReadAllText(path);
             var usersList = JsonSerializer.Deserialize<List<User>>(usersData, options) ??
                 throw new Exception("UsersData.json is empty");
