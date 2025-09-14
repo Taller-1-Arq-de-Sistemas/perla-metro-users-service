@@ -6,6 +6,8 @@ namespace PerlaMetroUsersService.Controllers
 {
     [ApiController]
     [Route("[controller]")]
+    [Produces("application/json")]
+    [Consumes("application/json")]
     public class AuthController : ControllerBase
     {
         private readonly IAuthService _authService;
@@ -15,20 +17,37 @@ namespace PerlaMetroUsersService.Controllers
             _authService = authService;
         }
 
+        /// <summary>
+        /// Registers a new passenger user and returns profile + token.
+        /// </summary>
+        /// <returns>Created user profile and JWT token.</returns>
         [HttpPost("register")]
+        [ProducesResponseType(typeof(RegisterPassengerResponseDto), StatusCodes.Status201Created)]
+        [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status409Conflict)]
+        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
         public async Task<IActionResult> Register([FromBody] RegisterPassengerRequestDto user, CancellationToken ct)
         {
             var createdUser = await _authService.Register(user, ct);
-            return CreatedAtAction(actionName: nameof(UserController.GetUserById),
-                                   controllerName: "Auth",
+            return CreatedAtAction(actionName: nameof(Register),
+                                   controllerName: "auth",
                                    routeValues: new { id = createdUser.Id },
                                    value: createdUser);
         }
+        /// <summary>
+        /// Logs in a user and returns a JWT token.
+        /// </summary>
+        /// <returns>JWT token string.</returns>
         [HttpPost("login")]
+        [ProducesResponseType(typeof(LoginUserResponseDto), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
+        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
         public async Task<IActionResult> Login([FromBody] LoginUserRequestDto request, CancellationToken ct)
         {
-            var token = await _authService.Login(request, ct);
-            return Ok(token);
+            var response = await _authService.Login(request, ct);
+            return Ok(response);
         }
     }
 }
