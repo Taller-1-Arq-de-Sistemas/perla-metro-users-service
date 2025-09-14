@@ -15,4 +15,10 @@ internal static class AuthResponseMappers
             Role = roleName,
             Token = token,
         };
+
+    public static LoginUserResponseDto ToLoginResponse(string token)
+        => new()
+        {
+            Token = token,
+        };
 }
