@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using PerlaMetroUsersService.Exceptions;
 using System.Security.Authentication;
 using System.Text.Json;
+using System.Diagnostics;
 
 
 namespace PerlaMetroUsersService.Middlewares
@@ -28,31 +29,32 @@ namespace PerlaMetroUsersService.Middlewares
             {
                 if (exceptionMapping.TryGetValue(ex.GetType(), out var mapping))
                 {
-                    await GenerateHttpResponse(ex, context, mapping.ErrorMessage, mapping.StatusCode);
+                    await GenerateHttpResponse(ex, context, mapping.ErrorMessage, mapping.StatusCode, mapping.Code);
                 }
                 else
                 {
-                    await GenerateHttpResponse(ex, context, "Internal Server Error", 500);
+                    await GenerateHttpResponse(ex, context, "Internal Server Error", 500, "internal_error");
                 }
             }
         }
 
-        private readonly Dictionary<Type, (string ErrorMessage, int StatusCode)> exceptionMapping = new()
+        private readonly Dictionary<Type, (string ErrorMessage, int StatusCode, string Code)> exceptionMapping = new()
         {
-            { typeof(InvalidCredentialException), ("Invalid credentials", 401) },
-            { typeof(UnauthorizedAccessException), ("Unauthorized access", 401) },
-            { typeof(NotFoundException), ("Entity not found", 404) },
-            { typeof(DuplicateException), ("Entity duplicated", 409) },
-            { typeof(ConflictException), ("Conflict", 409) },
-            { typeof(OperationCanceledException), ("Operation canceled", 499) },
-            { typeof(InternalErrorException), ("Internal server error", 500) }
+            { typeof(InvalidCredentialException), ("Invalid credentials", 401, "invalid_credentials") },
+            { typeof(UnauthorizedAccessException), ("Unauthorized access", 401, "unauthorized") },
+            { typeof(NotFoundException), ("Entity not found", 404, "not_found") },
+            { typeof(DuplicateException), ("Entity duplicated", 409, "duplicate") },
+            { typeof(ConflictException), ("Conflict", 409, "conflict") },
+            { typeof(OperationCanceledException), ("Operation canceled", 499, "operation_canceled") },
+            { typeof(InternalErrorException), ("Internal server error", 500, "internal_error") }
         };
 
         private async Task GenerateHttpResponse(
             Exception ex,
             HttpContext context,
             string errorTitle,
-            int statusCode
+            int statusCode,
+            string code
         )
         {
             if (statusCode >= 500)
@@ -69,7 +71,10 @@ namespace PerlaMetroUsersService.Middlewares
                 Title = errorTitle,
                 Detail = ex.Message,
                 Instance = context.Request.Path, // Internal API URL that caused the error
+                Type = $"https://httpstatuses.io/{statusCode}"
             };
+            response.Extensions["traceId"] = Activity.Current?.Id ?? context.TraceIdentifier;
+            response.Extensions["code"] = code;
 
             var options = new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase };
 
