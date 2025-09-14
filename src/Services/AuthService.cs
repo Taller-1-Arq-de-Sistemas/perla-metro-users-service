@@ -42,7 +42,7 @@ namespace PerlaMetroUsersService.Services
             return response;
         }
 
-        public async Task<string?> Login(LoginUserRequestDto user, CancellationToken ct = default)
+        public async Task<LoginUserResponseDto?> Login(LoginUserRequestDto user, CancellationToken ct = default)
         {
             var existingUser = await _unitOfWork.Users.GetByEmailAsync(user.Email, ct);
             if (existingUser == null || !_passwordHasher.Verify(user.Password, existingUser.Password) || existingUser.DeletedAt != null)
@@ -50,7 +50,9 @@ namespace PerlaMetroUsersService.Services
 
             var role = await _unitOfWork.Roles.GetByIdAsync(existingUser.RoleId, ct) ?? throw new NotFoundException("Role does not exist.");
             var token = _jwtService.GenerateToken(existingUser.Email, role.Name);
-            return token;
+            var response = AuthResponseMappers.ToLoginResponse(token);
+
+            return response;
         }
     }
 }
