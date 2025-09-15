@@ -29,10 +29,7 @@ namespace PerlaMetroUsersService.Controllers
         public async Task<IActionResult> CreateUser([FromBody] CreateUserRequestDto user, CancellationToken ct)
         {
             var createdUser = await _userService.Create(user, ct);
-            return CreatedAtAction(actionName: nameof(GetUserById),
-                                   controllerName: "User",
-                                   routeValues: new { id = createdUser.Id },
-                                   value: createdUser);
+            return CreatedAtAction(nameof(GetUserById), new { id = createdUser.Id }, createdUser);
         }
 
         /// <summary>
