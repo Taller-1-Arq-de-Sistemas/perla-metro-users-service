@@ -9,7 +9,7 @@ internal static class UsersReadMappers
     public static readonly Expression<Func<User, ListUserResponseDto>> ToListItem =
         u => new ListUserResponseDto
         {
-            Id = u.Id,
+            Id = u.Id.ToString(),
             FullName = u.Name + " " + u.LastNames,
             Email = u.Email,
             Status = u.DeletedAt == null ? "Active" : "Deleted",
@@ -19,7 +19,7 @@ internal static class UsersReadMappers
     public static readonly Expression<Func<User, GetUserResponseDto>> ToDetail =
         u => new GetUserResponseDto
         {
-            Id = u.Id,
+            Id = u.Id.ToString(),
             Name = u.Name,
             LastNames = u.LastNames,
             Email = u.Email,
@@ -31,7 +31,7 @@ internal static class UsersReadMappers
     public static GetUserResponseDto MapToDetail(User u) =>
         new()
         {
-            Id = u.Id,
+            Id = u.Id.ToString(),
             Name = u.Name,
             LastNames = u.LastNames,
             Email = u.Email,

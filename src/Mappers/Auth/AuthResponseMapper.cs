@@ -8,7 +8,7 @@ internal static class AuthResponseMappers
     public static RegisterPassengerResponseDto ToRegisterResponse(User u, string roleName, string token)
         => new()
         {
-            Id = u.Id,
+            Id = u.Id.ToString(),
             Name = u.Name,
             LastNames = u.LastNames,
             Email = u.Email,

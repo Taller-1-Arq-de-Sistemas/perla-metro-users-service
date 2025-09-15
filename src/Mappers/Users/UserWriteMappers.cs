@@ -7,13 +7,13 @@ namespace PerlaMetroUsersService.Mappers.Users;
 
 internal static class UsersWriteMappers
 {
-    public static User CreatePassenger(RegisterPassengerRequestDto dto, string roleId, IPasswordHasherService hasher, IClockService clock)
+    public static User CreatePassenger(RegisterPassengerRequestDto dto, Guid roleId, IPasswordHasherService hasher, IClockService clock)
     {
         var normalizedEmail = NormalizeEmail(dto.Email);
 
         return new User
         {
-            Id = Guid.NewGuid().ToString(),
+            Id = Guid.NewGuid(),
             Name = dto.Name.Trim(),
             LastNames = dto.LastNames.Trim(),
             Email = normalizedEmail,
@@ -24,13 +24,13 @@ internal static class UsersWriteMappers
         };
     }
 
-    public static User CreateUser(CreateUserRequestDto dto, string roleId, IPasswordHasherService hasher, IClockService clock)
+    public static User CreateUser(CreateUserRequestDto dto, Guid roleId, IPasswordHasherService hasher, IClockService clock)
     {
         var normalizedEmail = NormalizeEmail(dto.Email);
 
         return new User
         {
-            Id = Guid.NewGuid().ToString(),
+            Id = Guid.NewGuid(),
             Name = dto.Name.Trim(),
             LastNames = dto.LastNames.Trim(),
             Email = normalizedEmail,
