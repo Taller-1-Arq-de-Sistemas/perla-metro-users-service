@@ -86,7 +86,7 @@ namespace PerlaMetroUsersService.Middlewares
 
     public static class ExceptionHandlerMiddlewareExtensions
     {
-        public static IApplicationBuilder UseExceptionHandler(
+        public static IApplicationBuilder UseProblemDetailsExceptionHandler(
             this IApplicationBuilder builder)
         {
             return builder.UseMiddleware<ExceptionHandlerMiddleware>();
