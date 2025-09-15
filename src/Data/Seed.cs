@@ -59,15 +59,16 @@ namespace PerlaMetroUsersService.Data
             var usersList = JsonSerializer.Deserialize<List<User>>(usersData, options) ??
                 throw new Exception("UsersData.json is empty");
 
+            var rng = new Random();
             foreach (var user in usersList)
             {
-                user.Id = Guid.NewGuid().ToString();
+                user.Id = Guid.NewGuid();
                 string hashedPassword = BCrypt.Net.BCrypt.HashPassword(user.Password);
                 user.Password = hashedPassword;
-                var daysCreatedRange = new Random().Next(-100, 0);
+                var daysCreatedRange = rng.Next(-100, 0);
                 user.CreatedAt = DateTime.UtcNow.AddDays(daysCreatedRange);
-                var daysDeletedRange = new Random().Next(daysCreatedRange, 365);
-                var deletedChance = new Random().Next(1, 10);
+                var daysDeletedRange = rng.Next(daysCreatedRange, 365);
+                var deletedChance = rng.Next(1, 10);
                 if (deletedChance <= 2)
                     user.DeletedAt = DateTime.UtcNow.AddDays(daysDeletedRange);
                 else
