@@ -18,6 +18,8 @@ namespace PerlaMetroUsersService.DTOs.Users
         [Required]
         [Password(ErrorMessage = "The password must be at least 8 characters long, with at least one uppercase letter, one lowercase letter, one number and one special character.")]
         public string Password { get; set; } = null!;
-        public string Role { get; set; } = "Passenger";
+
+        [RegularExpression("^(admin|passenger)$", ErrorMessage = "Role must be 'admin' or 'passenger'.")]
+        public string Role { get; set; } = "passenger";
     }
 }
