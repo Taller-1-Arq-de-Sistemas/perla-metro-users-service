@@ -25,7 +25,7 @@ namespace PerlaMetroUsersService.Repositories
                 .AsNoTracking()
                 .ToListAsync(ct);
 
-        public async Task<Role?> GetByIdAsync(string id, CancellationToken ct = default) =>
+        public async Task<Role?> GetByIdAsync(Guid id, CancellationToken ct = default) =>
             await _context.Roles
                 .AsNoTracking()
                 .SingleOrDefaultAsync(r => r.Id == id, ct);
