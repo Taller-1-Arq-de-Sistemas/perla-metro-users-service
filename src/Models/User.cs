@@ -5,7 +5,7 @@ namespace PerlaMetroUsersService.Models
     public class User
     {
         [Key]
-        public string Id { get; set; } = null!;
+        public Guid Id { get; set; }
         public string Name { get; set; } = null!;
         public string LastNames { get; set; } = null!;
         public string Email { get; set; } = null!;
@@ -13,6 +13,6 @@ namespace PerlaMetroUsersService.Models
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
         public DateTime? DeletedAt { get; set; } = null;
         public Role Role { get; set; } = null!;
-        public string RoleId { get; set; } = null!;
+        public Guid RoleId { get; set; }
     }
 }
