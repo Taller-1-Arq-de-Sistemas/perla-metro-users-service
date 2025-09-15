@@ -1,5 +1,8 @@
-public sealed class LowercaseParameterTransformer : IOutboundParameterTransformer
+namespace PerlaMetroUsersService.Util
 {
-    public string? TransformOutbound(object? value)
-        => value?.ToString()?.ToLowerInvariant();
+    public sealed class LowercaseParameterTransformer : IOutboundParameterTransformer
+    {
+        public string? TransformOutbound(object? value)
+            => value?.ToString()?.ToLowerInvariant();
+    }
 }
