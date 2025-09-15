@@ -4,9 +4,6 @@ using PerlaMetroUsersService.Repositories;
 using PerlaMetroUsersService.Repositories.Interfaces;
 using PerlaMetroUsersService.Services.Interfaces;
 using PerlaMetroUsersService.Services;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.IdentityModel.Tokens;
-using System.Text;
 using Scalar.AspNetCore;
 using Microsoft.AspNetCore.Mvc.ApplicationModels;
 using Microsoft.AspNetCore.Mvc;
@@ -14,6 +11,8 @@ using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 using System.Text.Json;
 using Prometheus;
+using PerlaMetroUsersService.Util;
+using PerlaMetroUsersService.Middlewares;
 
 namespace PerlaMetroUsersService.Extensions
 {
@@ -57,7 +56,8 @@ namespace PerlaMetroUsersService.Extensions
             // Output caching registration
             services.AddOutputCache(options =>
             {
-                options.AddBasePolicy(builder => builder.Cache());
+                // Avoid stale API responses for mutable resources; opt-in per-endpoint in future
+                options.AddBasePolicy(builder => builder.NoCache());
             });
 
             // Health checks (readiness: DB)
@@ -73,7 +73,7 @@ namespace PerlaMetroUsersService.Extensions
         {
             app.UseOutputCache();
 
-            app.UseMiddleware<Middlewares.ExceptionHandlerMiddleware>();
+            app.UseProblemDetailsExceptionHandler();
 
             if (app.Environment.IsDevelopment())
             {
@@ -87,8 +87,6 @@ namespace PerlaMetroUsersService.Extensions
             }
 
             app.UseHttpsRedirection();
-            app.UseAuthentication();
-            app.UseAuthorization();
             app.UseHttpMetrics();
             app.MapMetrics("/metrics");
             app.MapHealthEndpoints();
@@ -102,7 +100,6 @@ namespace PerlaMetroUsersService.Extensions
             AddOpenApiMapper(services);
             AddDbContext(services, config);
             AddUnitOfWork(services);
-            AddAuthentication(services, config);
             AddHttpContextAccessor(services);
         }
 
@@ -142,28 +139,6 @@ namespace PerlaMetroUsersService.Extensions
         private static void AddUnitOfWork(IServiceCollection services)
         {
             services.AddScoped<IUnitOfWork, UnitOfWork>();
-        }
-
-        private static IServiceCollection AddAuthentication(IServiceCollection services, IConfiguration config)
-        {
-            var jwtSecret = config.GetValue<string>("JWT_SECRET") ??
-                throw new InvalidOperationException("JWT_SECRET not found.");
-
-            services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-                .AddJwtBearer(options =>
-                {
-                    options.TokenValidationParameters = new TokenValidationParameters
-                    {
-                        ValidateIssuer = false,
-                        ValidateAudience = false,
-                        ValidateLifetime = true,
-                        ValidateIssuerSigningKey = true,
-                        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSecret)),
-                        ClockSkew = TimeSpan.Zero
-                    };
-                }
-            );
-            return services;
         }
 
         private static void AddCorsPolicies(IServiceCollection services, IConfiguration config)
