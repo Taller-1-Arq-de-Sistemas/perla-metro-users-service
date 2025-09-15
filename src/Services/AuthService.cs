@@ -44,7 +44,7 @@ namespace PerlaMetroUsersService.Services
 
         public async Task<LoginUserResponseDto?> Login(LoginUserRequestDto user, CancellationToken ct = default)
         {
-            var existingUser = await _unitOfWork.Users.GetByEmailAsync(user.Email, ct);
+            var existingUser = await _unitOfWork.Users.GetByEmailAsync(user.Email.Trim(), ct);
             if (existingUser == null || !_passwordHasher.Verify(user.Password, existingUser.Password) || existingUser.DeletedAt != null)
                 throw new InvalidCredentialException("Invalid email or password.");
 

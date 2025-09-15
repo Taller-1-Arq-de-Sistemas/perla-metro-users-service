@@ -20,7 +20,7 @@ namespace PerlaMetroUsersService.Services
         }
         public async Task<GetUserResponseDto> Create(CreateUserRequestDto user, CancellationToken ct = default)
         {
-            if (await _unitOfWork.Users.ExistsByEmailAsync(user.Email, ct))
+            if (await _unitOfWork.Users.ExistsByEmailAsync(user.Email.Trim(), ct))
                 throw new DuplicateException("User with this email already exists.");
 
             var roleName = user.Role?.Trim().ToLowerInvariant() ?? throw new ArgumentException("Role is required.");
@@ -37,7 +37,10 @@ namespace PerlaMetroUsersService.Services
         }
         public async Task Update(string id, EditUserRequestDto user, CancellationToken ct = default)
         {
-            var existingUser = await _unitOfWork.Users.GetEntityByIdAsync(id, ct) ??
+            if (!Guid.TryParse(id, out var userId))
+                throw new NotFoundException("User not found.");
+
+            var existingUser = await _unitOfWork.Users.GetEntityByIdAsync(userId, ct) ??
                 throw new NotFoundException("User not found.");
             UsersWriteMappers.ApplyProfileEdit(user, existingUser, _passwordHasher);
             await _unitOfWork.SaveChangesAsync(ct);
@@ -45,7 +48,10 @@ namespace PerlaMetroUsersService.Services
 
         public async Task Delete(string id, CancellationToken ct = default)
         {
-            var existingUser = await _unitOfWork.Users.GetEntityByIdAsync(id, ct) ??
+            if (!Guid.TryParse(id, out var userId))
+                throw new NotFoundException("User not found.");
+
+            var existingUser = await _unitOfWork.Users.GetEntityByIdAsync(userId, ct) ??
                 throw new NotFoundException("User not found.");
             _unitOfWork.Users.Delete(existingUser);
             await _unitOfWork.SaveChangesAsync(ct);
@@ -53,7 +59,10 @@ namespace PerlaMetroUsersService.Services
 
         public async Task SoftDelete(string id, CancellationToken ct = default)
         {
-            var existingUser = await _unitOfWork.Users.GetEntityByIdAsync(id, ct) ??
+            if (!Guid.TryParse(id, out var userId))
+                throw new NotFoundException("User not found.");
+
+            var existingUser = await _unitOfWork.Users.GetEntityByIdAsync(userId, ct) ??
                 throw new NotFoundException("User not found.");
             if (existingUser.DeletedAt != null)
                 throw new ConflictException("User is already deleted.");
@@ -75,9 +84,14 @@ namespace PerlaMetroUsersService.Services
                 ct);
         }
 
-        public async Task<GetUserResponseDto?> GetById(string id, CancellationToken ct = default) =>
-            await _unitOfWork.Users.GetByIdAsync(id, UsersReadMappers.ToDetail, ct) ??
+        public async Task<GetUserResponseDto?> GetById(string id, CancellationToken ct = default)
+        {
+            if (!Guid.TryParse(id, out var userId))
                 throw new NotFoundException("User not found.");
+
+            return await _unitOfWork.Users.GetByIdAsync(userId, UsersReadMappers.ToDetail, ct)
+                   ?? throw new NotFoundException("User not found.");
+        }
 
     }
 }
