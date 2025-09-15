@@ -16,6 +16,11 @@ var app = builder.Build();
 
 app.UseWebApp();
 
-AppSeedService.SeedDatabase(app);
+// Seed only in Development or when explicitly enabled
+if (app.Environment.IsDevelopment() ||
+    string.Equals(Environment.GetEnvironmentVariable("SEED_ON_STARTUP"), "true", StringComparison.OrdinalIgnoreCase))
+{
+    AppSeedService.SeedDatabase(app);
+}
 
 app.Run();
