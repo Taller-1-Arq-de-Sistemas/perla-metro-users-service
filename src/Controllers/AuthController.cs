@@ -29,8 +29,8 @@ namespace PerlaMetroUsersService.Controllers
         public async Task<IActionResult> Register([FromBody] RegisterPassengerRequestDto user, CancellationToken ct)
         {
             var createdUser = await _authService.Register(user, ct);
-            return CreatedAtAction(actionName: nameof(Register),
-                                   controllerName: "auth",
+            return CreatedAtAction(actionName: nameof(UserController.GetUserById),
+                                   controllerName: "User",
                                    routeValues: new { id = createdUser.Id },
                                    value: createdUser);
         }
