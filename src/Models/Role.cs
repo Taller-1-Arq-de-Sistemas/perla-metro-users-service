@@ -1,12 +1,24 @@
 using System.ComponentModel.DataAnnotations;
 
-namespace PerlaMetroUsersService.Models
+namespace PerlaMetroUsersService.Models;
+
+/// <summary>
+/// Represents a user role within the system.
+/// </summary>
+public class Role
 {
-    public class Role
-    {
-        [Key]
-        public Guid Id { get; set; }
-        public string Name { get; set; } = null!;
-        public ICollection<User> Users { get; set; } = [];
-    }
+    /// <summary>
+    /// The unique identifier for the role.
+    /// </summary>
+    [Key]
+    public Guid Id { get; set; }
+    /// <summary>
+    /// The name of the role.
+    /// </summary>
+    public string Name { get; set; } = null!;
+    /// <summary>
+    /// The users associated with this role.
+    /// </summary>
+    public ICollection<User> Users { get; set; } = [];
 }
+
