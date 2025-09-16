@@ -13,27 +13,25 @@ internal static class UsersReadMappers
     /// Maps a User entity to a ListUserResponseDto.
     /// </summary>
     public static readonly Expression<Func<User, ListUserResponseDto>> ToListItem =
-        u => new ListUserResponseDto
-        {
-            Id = u.Id.ToString(),
-            FullName = u.Name + " " + u.LastNames,
-            Email = u.Email,
-            Status = u.DeletedAt == null ? "Active" : "Deleted",
-            CreatedAt = u.CreatedAt,
-        };
+        u => new ListUserResponseDto(
+            u.Id.ToString(),
+            u.Name + " " + u.LastNames,
+            u.Email,
+            u.DeletedAt == null ? "Active" : "Deleted",
+            u.CreatedAt
+        );
 
     /// <summary>
     /// Maps a User entity to a GetUserResponseDto.
     /// </summary>
     public static readonly Expression<Func<User, GetUserResponseDto>> ToDetail =
-        u => new GetUserResponseDto
-        {
-            Id = u.Id.ToString(),
-            Name = u.Name,
-            LastNames = u.LastNames,
-            Email = u.Email,
-            Role = u.Role!.Name,
-            Status = u.DeletedAt == null ? "Active" : "Deleted",
-            CreatedAt = u.CreatedAt,
-        };
+        u => new GetUserResponseDto(
+            u.Id.ToString(),
+            u.Name,
+            u.LastNames,
+            u.Email,
+            u.Role!.Name,
+            u.DeletedAt == null ? "Active" : "Deleted",
+            u.CreatedAt
+        );
 }

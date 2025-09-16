@@ -16,15 +16,14 @@ internal static class AuthResponseMappers
     /// <param name="token">The JWT token for the user.</param>
     /// <returns>A RegisterPassengerResponseDto representing the user.</returns>
     public static RegisterPassengerResponseDto ToRegisterResponse(User u, string roleName, string token)
-        => new()
-        {
-            Id = u.Id.ToString(),
-            Name = u.Name,
-            LastNames = u.LastNames,
-            Email = u.Email,
-            Role = roleName,
-            Token = token,
-        };
+        => new(
+            u.Id.ToString(),
+            u.Name,
+            u.LastNames,
+            u.Email,
+            roleName,
+            token
+        );
 
     /// <summary>
     /// Maps a JWT token string to a LoginUserResponseDto.
@@ -32,8 +31,5 @@ internal static class AuthResponseMappers
     /// <param name="token">The JWT token for the user.</param>
     /// <returns>A LoginUserResponseDto representing the user.</returns>
     public static LoginUserResponseDto ToLoginResponse(string token)
-        => new()
-        {
-            Token = token,
-        };
+        => new(token);
 }
