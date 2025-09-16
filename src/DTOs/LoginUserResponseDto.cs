@@ -1,8 +1,9 @@
-namespace PerlaMetroUsersService.DTOs.Auth
-{
-    public sealed class LoginUserResponseDto
-    {
-        public string Token { get; init; } = default!;
-    }
-}
+namespace PerlaMetroUsersService.DTOs.Auth;
 
+/// <summary>
+/// DTO for login user response.
+/// </summary>
+/// <param name="Token">The JWT token for the authenticated user.</param>
+public sealed record LoginUserResponseDto(
+    string Token
+);

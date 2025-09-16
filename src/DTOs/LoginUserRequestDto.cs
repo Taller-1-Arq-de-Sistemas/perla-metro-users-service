@@ -1,14 +1,22 @@
 using System.ComponentModel.DataAnnotations;
 
-namespace PerlaMetroUsersService.DTOs.Auth
-{
-    public class LoginUserRequestDto
-    {
-        [Required]
-        [EmailAddress]
-        public string Email { get; set; } = null!;
+namespace PerlaMetroUsersService.DTOs.Auth;
 
-        [Required]
-        public string Password { get; set; } = null!;
-    }
+/// <summary>
+/// DTO for user login request.
+/// </summary>
+public sealed class LoginUserRequestDto
+{
+    /// <summary>
+    /// The email address of the user.
+    /// </summary>
+    [Required]
+    [EmailAddress]
+    public string Email { get; set; } = null!;
+
+    /// <summary>
+    /// The password for the user.
+    /// </summary>
+    [Required]
+    public string Password { get; set; } = null!;
 }
