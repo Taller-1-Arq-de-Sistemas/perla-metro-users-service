@@ -4,6 +4,16 @@ namespace PerlaMetroUsersService.Validators.Auth
 {
     public class PasswordAttribute : ValidationAttribute
     {
+        /// <summary>
+        /// Initializes a new instance of the <see cref="PasswordAttribute"/> class.
+        /// </summary>
+        public PasswordAttribute() { }
+
+        /// <summary>
+        /// Validates if the provided value is a valid password string.
+        /// </summary>
+        /// <param name="value">The value to validate.</param>
+        /// <returns>True if the password is valid; otherwise, false.</returns>
         public override bool IsValid(object? value)
         {
             var password = value?.ToString();
@@ -12,6 +22,13 @@ namespace PerlaMetroUsersService.Validators.Auth
             return PassAllRules(password);
         }
 
+        /// <summary>
+        /// Determines if the password meets all required rules:
+        /// at least one uppercase letter, one lowercase letter, one digit,
+        /// one special character, and a minimum length of 8 characters.
+        /// </summary>
+        /// <param name="password">The password string to check.</param>
+        /// <returns>True if the password meets all rules; otherwise, false.</returns>
         public static bool PassAllRules(string password)
         {
             bool hasUpper = false, hasLower = false, hasDigit = false, hasSpecial = false;
