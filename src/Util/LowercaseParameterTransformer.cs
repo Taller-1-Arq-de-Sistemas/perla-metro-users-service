@@ -1,8 +1,15 @@
-namespace PerlaMetroUsersService.Util
+namespace PerlaMetroUsersService.Util;
+
+/// <summary>
+/// Transforms route parameters to lowercase.
+/// </summary>
+public sealed class LowercaseParameterTransformer : IOutboundParameterTransformer
 {
-    public sealed class LowercaseParameterTransformer : IOutboundParameterTransformer
-    {
-        public string? TransformOutbound(object? value)
-            => value?.ToString()?.ToLowerInvariant();
-    }
+    /// <summary>
+    /// Transforms the given value to lowercase invariant.
+    /// </summary>
+    /// <param name="value">The value to transform.</param>
+    /// <returns>The transformed value.</returns>
+    public string? TransformOutbound(object? value)
+        => value?.ToString()?.ToLowerInvariant();
 }
