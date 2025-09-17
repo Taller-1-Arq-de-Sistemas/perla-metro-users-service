@@ -75,7 +75,13 @@ dotnet user-secrets set "JWT_SECRET" "YourReallyGoodJWTSecret"
 
 **Note (secret values)**: You can change these values to whatever you want, just make sure that these values match to the values in the entire system (like the JWT secret).
 
-**Note (database)**: You need a PostgreSQL database running for this setup, but if you do not have one, you can use Docker to run a PostgreSQL instance, like the one present in the `docker-compose.yaml` file. If you already have Postgres on port 5432 locally, adjust the compose port mapping to avoid conflicts.
+**Note (database)**: You need a PostgreSQL database running for this setup, but if you do not have one, you can use Docker to run a PostgreSQL instance, like the one present in the `docker-compose.yaml` file. You can use the following command to run a PostgreSQL instance with Docker:
+
+```bash
+docker compose up -d postgres
+```
+
+If you already have Postgres on port 5432 locally, adjust the compose port mapping to avoid conflicts.
 
 4.4 **Run the project**
 
@@ -285,10 +291,8 @@ The service uses several patterns to keep the codebase modular, testable, and ma
 
 ## Production notes
 
-- Protect endpoints with authorization attributes (e.g., `[Authorize]`) and role-based policies where needed.
-- Keep API docs (`/scalar`) disabled in production (default behavior when `ASPNETCORE_ENVIRONMENT=Production`).
-- Use a strong `JWT_SECRET` and never commit secrets to the repo. Configure them via environment variables (Render dashboard or deployment environment).
-- Configure CORS restricted origins in production using `Cors__AllowedOrigins__*` environment variables.
+- This service is already deployed on Render and it is accessible through this URL: https://perla-metro-users-service-v1.onrender.com.
+- The CORS configuration for now just accepts request to two origins: http://localhost:3000 and http://localhost:8080.
 
 ## Health endpoints
 
@@ -297,8 +301,6 @@ The service exposes standard health endpoints:
 - `/healthz`: Liveness probe (process up). No external checks; returns `{ status: "ok" }`.
 - `/readyz`: Readiness probe (runs checks tagged as ready, e.g., DB connectivity) with JSON detail.
 - `/health`: Full health report for all checks with JSON detail.
-
-Render blueprint is configured to use `/healthz` as health check.
 
 ## Metrics
 
