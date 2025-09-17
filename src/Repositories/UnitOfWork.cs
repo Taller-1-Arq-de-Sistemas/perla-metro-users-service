@@ -1,53 +1,52 @@
 using PerlaMetroUsersService.Data;
 using PerlaMetroUsersService.Repositories.Interfaces;
 
-namespace PerlaMetroUsersService.Repositories
+namespace PerlaMetroUsersService.Repositories;
+
+public class UnitOfWork : IUnitOfWork
 {
-    public class UnitOfWork : IUnitOfWork
+    private readonly DataContext _context;
+    private IUserRepository _userRepository = null!;
+    private IRoleRepository _roleRepository = null!;
+    private bool _disposed = false;
+
+    public UnitOfWork(DataContext context)
     {
-        private readonly DataContext _context;
-        private IUserRepository _userRepository = null!;
-        private IRoleRepository _roleRepository = null!;
-        private bool _disposed = false;
+        _context = context;
+    }
 
-        public UnitOfWork(DataContext context)
+    public IUserRepository Users
+    {
+        get
         {
-            _context = context;
+            _userRepository ??= new UserRepository(_context);
+            return _userRepository;
         }
+    }
 
-        public IUserRepository Users
+    public IRoleRepository Roles
+    {
+        get
         {
-            get
-            {
-                _userRepository ??= new UserRepository(_context);
-                return _userRepository;
-            }
+            _roleRepository ??= new RoleRepository(_context);
+            return _roleRepository;
         }
+    }
 
-        public IRoleRepository Roles
-        {
-            get
-            {
-                _roleRepository ??= new RoleRepository(_context);
-                return _roleRepository;
-            }
-        }
+    public async Task<int> SaveChangesAsync(CancellationToken ct = default) =>
+        await _context.SaveChangesAsync(ct);
 
-        public async Task<int> SaveChangesAsync(CancellationToken ct = default) =>
-            await _context.SaveChangesAsync(ct);
+    protected virtual void Dispose(bool disposing)
+    {
+        if (!_disposed && disposing)
+            _context.Dispose();
 
-        protected virtual void Dispose(bool disposing)
-        {
-            if (!_disposed && disposing)
-                _context.Dispose();
+        _disposed = true;
+    }
 
-            _disposed = true;
-        }
-
-        public void Dispose()
-        {
-            Dispose(true);
-            GC.SuppressFinalize(this);
-        }
+    public void Dispose()
+    {
+        Dispose(true);
+        GC.SuppressFinalize(this);
     }
 }
