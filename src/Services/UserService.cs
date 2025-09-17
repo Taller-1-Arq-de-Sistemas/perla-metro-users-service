@@ -6,18 +6,25 @@ using PerlaMetroUsersService.Exceptions;
 
 namespace PerlaMetroUsersService.Services;
 
+/// <summary>
+/// Application service for user management operations (CRUD + queries).
+/// </summary>
 public class UserService : IUserService
 {
     private readonly IUnitOfWork _unitOfWork;
     private readonly IPasswordHasherService _passwordHasher;
     private readonly IClockService _clock;
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="UserService"/> class.
+    /// </summary>
     public UserService(IUnitOfWork unitOfWork, IPasswordHasherService passwordHasher, IClockService clock)
     {
         _unitOfWork = unitOfWork;
         _passwordHasher = passwordHasher;
         _clock = clock;
     }
+    /// <inheritdoc />
     public async Task<GetUserResponseDto> Create(CreateUserRequestDto user, CancellationToken ct = default)
     {
         if (await _unitOfWork.Users.ExistsByEmailAsync(user.Email.Trim(), ct))
@@ -35,6 +42,7 @@ public class UserService : IUserService
         return await _unitOfWork.Users.GetByIdAsync(newUser.Id, UsersReadMappers.ToDetail, ct)
                ?? throw new NotFoundException("User not found.");
     }
+    /// <inheritdoc />
     public async Task Update(string id, EditUserRequestDto user, CancellationToken ct = default)
     {
         if (!Guid.TryParse(id, out var userId))
@@ -46,6 +54,7 @@ public class UserService : IUserService
         await _unitOfWork.SaveChangesAsync(ct);
     }
 
+    /// <inheritdoc />
     public async Task Delete(string id, CancellationToken ct = default)
     {
         if (!Guid.TryParse(id, out var userId))
@@ -57,6 +66,7 @@ public class UserService : IUserService
         await _unitOfWork.SaveChangesAsync(ct);
     }
 
+    /// <inheritdoc />
     public async Task SoftDelete(string id, CancellationToken ct = default)
     {
         if (!Guid.TryParse(id, out var userId))
@@ -70,6 +80,7 @@ public class UserService : IUserService
         await _unitOfWork.SaveChangesAsync(ct);
     }
 
+    /// <inheritdoc />
     public async Task<List<ListUserResponseDto>> GetAll(string? name, string? email, string? status, CancellationToken ct = default)
     {
         var normalizedStatus = string.IsNullOrWhiteSpace(status)
@@ -84,6 +95,7 @@ public class UserService : IUserService
             ct);
     }
 
+    /// <inheritdoc />
     public async Task<GetUserResponseDto?> GetById(string id, CancellationToken ct = default)
     {
         if (!Guid.TryParse(id, out var userId))

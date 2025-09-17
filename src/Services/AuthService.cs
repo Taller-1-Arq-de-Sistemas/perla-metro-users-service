@@ -8,6 +8,9 @@ using System.Security.Authentication;
 
 namespace PerlaMetroUsersService.Services;
 
+/// <summary>
+/// Application service that handles user authentication workflows such as registration and login.
+/// </summary>
 public class AuthService : IAuthService
 {
     private readonly IUnitOfWork _unitOfWork;
@@ -15,6 +18,9 @@ public class AuthService : IAuthService
     private readonly IPasswordHasherService _passwordHasher;
     private readonly IJwtService _jwtService;
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="AuthService"/> class.
+    /// </summary>
     public AuthService(IUnitOfWork unitOfWork, IClockService clock, IPasswordHasherService passwordHasher, IJwtService jwtService)
     {
         _unitOfWork = unitOfWork;
@@ -23,6 +29,7 @@ public class AuthService : IAuthService
         _passwordHasher = passwordHasher;
     }
 
+    /// <inheritdoc />
     public async Task<RegisterPassengerResponseDto> Register(RegisterPassengerRequestDto user, CancellationToken ct = default)
     {
         if (await _unitOfWork.Users.ExistsByEmailAsync(user.Email, ct))
@@ -42,6 +49,7 @@ public class AuthService : IAuthService
         return response;
     }
 
+    /// <inheritdoc />
     public async Task<LoginUserResponseDto?> Login(LoginUserRequestDto user, CancellationToken ct = default)
     {
         var existingUser = await _unitOfWork.Users.GetByEmailAsync(user.Email.Trim(), ct);

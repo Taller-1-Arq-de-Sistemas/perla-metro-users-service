@@ -6,6 +6,9 @@ using PerlaMetroUsersService.Repositories.Interfaces;
 
 namespace PerlaMetroUsersService.Repositories;
 
+/// <summary>
+/// Repository for User entities providing CRUD and query operations.
+/// </summary>
 public class UserRepository : IUserRepository
 {
     private readonly DataContext _context;
@@ -15,15 +18,20 @@ public class UserRepository : IUserRepository
         _context = context;
     }
 
+    /// <inheritdoc />
     public void Create(User user) => _context.Users.Add(user);
 
+    /// <inheritdoc />
     public void Delete(User user) => _context.Users.Remove(user);
 
+    /// <inheritdoc />
     public void Update(User user) => _context.Users.Update(user);
 
+    /// <inheritdoc />
     public async Task<List<T>> GetAllAsync<T>(Expression<Func<User, T>> selector, CancellationToken ct = default) =>
         await GetAllAsync(selector, name: null, email: null, status: null, ct);
 
+    /// <inheritdoc />
     public async Task<List<T>> GetAllAsync<T>(
         Expression<Func<User, T>> selector,
         string? name,
@@ -41,14 +49,12 @@ public class UserRepository : IUserRepository
         if (!string.IsNullOrWhiteSpace(name))
         {
             var n = name.Trim();
-            // Case-insensitive CONTAINS over Full Name using Postgres ILIKE
             query = query.Where(u => EF.Functions.ILike(u.Name + " " + u.LastNames, $"%{n}%"));
         }
 
         if (!string.IsNullOrWhiteSpace(email))
         {
             var e = email.Trim();
-            // Case-insensitive CONTAINS on email
             query = query.Where(u => EF.Functions.ILike(u.Email, $"%{e}%"));
         }
 
@@ -58,6 +64,7 @@ public class UserRepository : IUserRepository
             .ToListAsync(ct);
     }
 
+    /// <inheritdoc />
     public async Task<T?> GetByIdAsync<T>(Guid id, Expression<Func<User, T>> selector, CancellationToken ct = default) =>
         await _context.Users
             .Where(u => u.Id == id && u.DeletedAt == null)
@@ -65,15 +72,18 @@ public class UserRepository : IUserRepository
             .Select(selector)
             .SingleOrDefaultAsync(ct);
 
+    /// <inheritdoc />
     public async Task<User?> GetEntityByIdAsync(Guid id, CancellationToken ct = default) =>
         await _context.Users
             .FirstOrDefaultAsync(u => u.Id == id && u.DeletedAt == null, ct);
 
+    /// <inheritdoc />
     public async Task<User?> GetByEmailAsync(string email, CancellationToken ct = default) =>
         await _context.Users
             .Include(u => u.Role)
             .FirstOrDefaultAsync(u => u.DeletedAt == null && EF.Functions.ILike(u.Email, email.Trim()), ct);
 
+    /// <inheritdoc />
     public async Task<bool> ExistsByEmailAsync(string email, CancellationToken ct = default) =>
         await _context.Users
             .AnyAsync(u => u.DeletedAt == null && EF.Functions.ILike(u.Email, email.Trim()), ct);

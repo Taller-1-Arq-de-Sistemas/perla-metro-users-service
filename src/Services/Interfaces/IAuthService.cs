@@ -8,17 +8,21 @@ namespace PerlaMetroUsersService.Services.Interfaces;
 public interface IAuthService
 {
     /// <summary>
-    /// Registers a new passenger user.
+    /// Registers a new passenger user and issues a JWT.
     /// </summary>
-    /// <param name="user">The user registration details.</param>
+    /// <param name="user">Registration data.</param>
     /// <param name="ct">Cancellation token.</param>
-    /// <returns>The response containing the registered user information.</returns>
+    /// <returns>Created user profile plus token.</returns>
+    /// <exception cref="PerlaMetroUsersService.Exceptions.DuplicateException">Thrown when a user with the same email already exists.</exception>
+    /// <exception cref="PerlaMetroUsersService.Exceptions.NotFoundException">Thrown when the default role cannot be found.</exception>
     Task<RegisterPassengerResponseDto> Register(RegisterPassengerRequestDto user, CancellationToken ct = default);
     /// <summary>
-    /// Logs in a user and returns a JWT token if successful.
+    /// Authenticates a user by email and password and issues a JWT.
     /// </summary>
-    /// <param name="user">The user login details.</param>
+    /// <param name="user">Login credentials.</param>
     /// <param name="ct">Cancellation token.</param>
-    /// <returns>The response containing the JWT token if login is successful.</returns>
+    /// <returns>Login response with token.</returns>
+    /// <exception cref="System.Security.Authentication.InvalidCredentialException">Thrown when credentials are invalid.</exception>
+    /// <exception cref="PerlaMetroUsersService.Exceptions.NotFoundException">Thrown when the user's role cannot be resolved.</exception>
     Task<LoginUserResponseDto?> Login(LoginUserRequestDto user, CancellationToken ct = default);
 }
