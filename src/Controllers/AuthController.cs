@@ -38,8 +38,8 @@ public class AuthController : ControllerBase
     public async Task<IActionResult> Register([FromBody] RegisterPassengerRequestDto user, CancellationToken ct)
     {
         var createdUser = await _authService.Register(user, ct);
-        return CreatedAtAction(actionName: nameof(UserController.GetUserById),
-                               controllerName: "User",
+        return CreatedAtAction(actionName: nameof(UsersController.GetUserById),
+                               controllerName: "Users",
                                routeValues: new { id = createdUser.Id },
                                value: createdUser);
     }

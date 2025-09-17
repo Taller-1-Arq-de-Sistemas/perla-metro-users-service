@@ -11,15 +11,15 @@ namespace PerlaMetroUsersService.Controllers;
 [Route("[controller]")]
 [Produces("application/json")]
 [Consumes("application/json")]
-public class UserController : ControllerBase
+public class UsersController : ControllerBase
 {
     private readonly IUserService _userService;
 
     /// <summary>
-    /// Constructor for UserController.
+    /// Constructor for UsersController.
     /// </summary>
     /// <param name="userService">The user service.</param>
-    public UserController(IUserService userService)
+    public UsersController(IUserService userService)
     {
         _userService = userService;
     }
