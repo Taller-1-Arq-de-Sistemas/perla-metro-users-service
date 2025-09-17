@@ -12,7 +12,7 @@ using PerlaMetroUsersService.Data;
 namespace PerlaMetroUsersService.src.Data.Migrations
 {
     [DbContext(typeof(DataContext))]
-    [Migration("20250915170130_ChangeIDToUUIDForUsersAndRoles")]
+    [Migration("20250917113501_ChangeIDToUUIDForUsersAndRoles")]
     partial class ChangeIDToUUIDForUsersAndRoles
     {
         /// <inheritdoc />
