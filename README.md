@@ -49,7 +49,7 @@ Once you have replaced everything, save the changes and move on to the next step
 docker compose up --build -d
 ```
 
-A Docker container would be running the web app in the port **8080**
+A Docker container would be running the web app in the port **3010**
 
 ## Setup without Docker
 
@@ -86,12 +86,10 @@ If you already have Postgres on port 5432 locally, adjust the compose port mappi
 4.4 **Run the project**
 
 ```bash
-# optional: choose a port to match Docker (recommended)
-export ASPNETCORE_URLS=http://localhost:8080
 dotnet run
 ```
 
-The server will start on the configured URL (e.g., **8080**) and the **seeders** will be created automatically. Access the API via http://localhost:8080.
+The server will start on the configured URL (e.g., **3010**) and the **seeders** will be created automatically. Access the API via http://localhost:3010.
 
 ## Data seeder
 
